@@ -1,0 +1,6 @@
+{
+  "name": "WeatherBot Tomorrow",
+  "description": "Một chatbot thông minh giúp bạn dự báo thời tiết cho ngày mai tại bất kỳ địa điểm nào.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
