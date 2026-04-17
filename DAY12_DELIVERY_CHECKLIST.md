@@ -66,29 +66,128 @@ Submit a **GitHub repository** containing:
 
 ## Part 3: Cloud Deployment
 
-### Exercise 3.1: Railway deployment
+### Exercise 3.1: Vercel Deployment (Primary - Preferred)
 
-**Files verified:**
-- ✅ railway.toml exists with builder, startCommand, healthcheckPath
+**Deployment URL:** https://lab12-phan-duong-dinh-2-a202600277.vercel.app/
+
+**Image:**
+![deploy success](./deploy.png) 
+![application image](./deploy2.png) 
+
+**Platform:** Vercel (Frontend - React + Vite)
+
+**Project Structure:**
+```
+v2/
+├── src/
+│   ├── App.tsx           # Main React component
+│   ├── lib/
+│   │   ├── gemini.ts     # Gemini AI integration
+│   │   └── weather.ts    # Weather data utilities
+│   └── main.tsx          # Entry point
+├── index.html
+├── package.json          # Dependencies
+├── vite.config.ts        # Vite configuration
+└── .env.example          # Environment template
+```
+
+**Technology Stack:**
+- React 19 + TypeScript
+- Vite (build tool)
+- Tailwind CSS
+- Google Gemini AI API
+- Motion (animations)
+
+**Features:**
+- Weather forecast chatbot
+- Vietnamese language support
+- Beautiful UI with weather icons
+- Real-time weather data
+
+**Test Commands:**
+```bash
+# Open in browser
+open https://lab12-phan-duong-dinh-2-a202600277.vercel.app/
+
+# Or use curl
+curl -s https://lab12-phan-duong-dinh-2-a202600277.vercel.app/
+# Returns: HTML page with React app
+```
+
+### Exercise 3.2: Railway Deployment (Alternative - Backend API)
+
+**Platform:** Railway (PaaS - Backend API)
+
+**Files configured:**
+- ✅ railway.toml (exists)
 - ✅ healthcheckPath = /health
-- ✅ startCommand = uvicorn app:app --host 0.0.0.0 --port $PORT
+- ✅ startCommand configured
 
-**Deployment steps completed:**
-1. Railway CLI installed
-2. Project configured with railway.toml
-3. Environment variables set
-4. Health check endpoint working
+**Local Backend (Docker Compose):**
+```bash
+# Chạy backend local
+cd 06-lab-complete/v1
+docker compose up -d
 
-### Exercise 3.2: Render deployment
+# Test backend
+curl http://localhost:8000/health
+# Result: {"status":"ok","version":"1.0.0","environment":"staging"...}
 
-**Files verified:**
+# Test với API key
+curl -H "X-API-Key: dev-key-change-me-in-production" \
+     -X POST http://localhost:8000/ask \
+     -H "Content-Type: application/json" \
+     -d '{"question": "What is Docker?"}'
+```
+
+**Railway Deploy Commands:**
+```bash
+npm i -g @railway/cli
+railway login
+railway init
+railway variables set ENVIRONMENT=staging
+railway variables set AGENT_API_KEY=your-secret-key
+railway variables set REDIS_URL=redis://redis:6379/0
+railway up
+railway domain
+```
+
+### Exercise 3.3: Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Vercel (Frontend)                     │
+│  https://lab12-phan-duong-dinh-2-a202600277.vercel.app │
+│                                                          │
+│  React App → Google Gemini AI API                       │
+└─────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────┐
+│              Railway / Local (Backend API)               │
+│                                                          │
+│  FastAPI Agent                                           │
+│  ├── /health (GET)                                      │
+│  ├── /ask (POST) - X-API-Key required                  │
+│  ├── /ready (GET)                                       │
+│  └── /metrics (GET)                                      │
+│                                                          │
+│  Features:                                               │
+│  ├── Rate limiting (20 req/min)                        │
+│  ├── Cost guard ($5/day)                               │
+│  ├── JWT/Auth support                                  │
+│  └── Redis session storage                             │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Exercise 3.4: Render & Cloud Run (Additional Options)
+
+**Render deployment:**
 - ✅ render.yaml exists with services definition
 - ✅ healthCheckPath: /health
 - ✅ autoDeploy: true
 
-### Exercise 3.3: Cloud Run (CI/CD)
-
-**Files verified:**
+**Cloud Run (CI/CD):**
 - ✅ cloudbuild.yaml - CI/CD pipeline (test → build → push → deploy)
 - ✅ service.yaml - Cloud Run service definition
 
@@ -208,31 +307,58 @@ curl -H "X-API-Key: dev-key-change-me-in-production" -X POST http://localhost:80
 ```markdown
 # Deployment Information
 
-## Platform
-Docker Compose (Local Development)
+## Public URLs
+
+### Frontend (Vercel)
+**URL:** https://lab12-phan-duong-dinh-2-a202600277.vercel.app/
+**Platform:** Vercel (React + Vite)
+**Status:** ✅ Deployed and working
+
+### Backend (Local Docker)
+**URL:** http://localhost:8000 (local)
+**Platform:** Docker Compose
+**Status:** ✅ Running
 
 ## Test Commands
 
-### Health Check
+### Frontend (Vercel)
+```bash
+# Open in browser
+open https://lab12-phan-duong-dinh-2-a202600277.vercel.app/
+
+# Weather chatbot UI
+curl -s https://lab12-phan-duong-dinh-2-a202600277.vercel.app/
+# Returns: HTML page with SkyCast AI weather chatbot
+```
+
+### Backend (Docker)
+```bash
+# Health Check
 curl http://localhost:8000/health
 # Result: {"status":"ok","version":"1.0.0","environment":"staging","uptime_seconds":1133.6,"total_requests":7,"checks":{"llm":"openai"},"timestamp":"2026-04-17T10:04:55.818886+00:00"}
 
-### Readiness Check
+# Readiness Check
 curl http://localhost:8000/ready
 # Result: {"ready":true}
 
-### API Test (with authentication)
+# API Test (with authentication)
 curl -X POST http://localhost:8000/ask \
   -H "X-API-Key: dev-key-change-me-in-production" \
   -H "Content-Type: application/json" \
   -d '{"question": "What is Docker?"}'
 # Result: {"question":"What is Docker?","answer":"Container là cách đóng gói app để chạy ở mọi nơi...","model":"gpt-4o-mini","timestamp":"..."}
 
-### Metrics
+# Metrics
 curl http://localhost:8000/metrics -H "X-API-Key: dev-key-change-me-in-production"
 # Result: {"uptime_seconds":1155.1,"total_requests":38,"error_count":0,"daily_cost_usd":0.0,"daily_budget_usd":5.0,"budget_used_pct":0.0}
+```
 
-## Environment Variables Set
+## Environment Variables Summary
+
+### Vercel (Frontend)
+- GEMINI_API_KEY (Google AI API key)
+
+### Docker (Backend)
 - ENVIRONMENT=staging
 - APP_NAME=Production AI Agent
 - APP_VERSION=1.0.0
@@ -258,6 +384,8 @@ curl http://localhost:8000/metrics -H "X-API-Key: dev-key-change-me-in-productio
 - [x] Rate limiting implemented
 - [x] Docker build successful
 - [x] Production readiness: 20/20 checks passed
+- [x] Vercel deployment working (https://lab12-phan-duong-dinh-2-a202600277.vercel.app/)
+- [x] Frontend app structure complete (v2/ with React + Vite)
 
 ---
 
@@ -338,11 +466,15 @@ docker images 06-lab-complete-agent
 
 **GitHub Repository:** (Cần tạo và push lên GitHub)
 
+**Public Deployments:**
+- **Frontend (Vercel):** https://lab12-phan-duong-dinh-2-a202600277.vercel.app/
+- **Backend (Local Docker):** http://localhost:8000
+
 ```bash
 git init
 git add .
-git commit -m "Day 12 Lab - Production-ready AI Agent with Docker, Auth, Rate Limiting"
-git remote add origin https://github.com/DawieMalmsteel/lab12-PhanDuongDinh-2A202600277
+git commit -m "Day 12 Lab - Production-ready AI Agent with Docker, Auth, Rate Limiting + Vercel Frontend"
+git remote add origin https://github.com/your-username/day12-agent-deployment.git
 git push -u origin main
 ```
 
